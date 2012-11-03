@@ -1,7 +1,7 @@
 # MongoDB Basics
 
 Author: Andy Wenk  
-Version: 0.0.2  
+Version: 0.0.3  
 Date: 03.11.2012  
 
 ## Abstract
@@ -147,7 +147,7 @@ The documents in a database are organized in collections. Each database can have
 
 One document is found in the collection people of the database earth.	
 	
-### Creating a document with **insert**
+### Creating a document with **insert()**
 
 Creating documents is basically the task to put one or more JSON string(s) into a collection.
 
@@ -179,7 +179,7 @@ When now firing
 
 there should exist four documents with great guitar players in the the people collection.
 
-### Removing a document with **remove**
+### Removing a document with **remove()**
 
 The remove() method is basically the same as find() (see next). It is expecting a JSON string with information about which document to remove from the collection. The most obvious way is to remove a documetn by its _id:
 
@@ -192,9 +192,16 @@ The remove() method is basically the same as find() (see next). It is expecting 
 	> db.people.find().count()
 	3
 
-### Querying documents with **find**
+### Querying documents with findOne()
 
-As already shown before, documents ar retrieved from a collection by firing the method find(). If no arguments given, find() will return all documents from the collection. A nice helper is the method pretty() which can be chained to find() or any other method invocation. This will print the resulting JSON strings in a nicely readable format.
+The findOne() method is a helper method for find() and will return exactly one or zero documents. It expects a document with the query values as a first parameter. The second parameter is denoting which values should be returned:
+
+	> db.people.findOne({"name": "Carlos Santana"}, {"profession": true, "_id": false})
+	{ "profession" : "guitarist" }  
+
+### Querying documents with **find()**
+
+As already shown before, documents are retrieved from a collection by firing the method find(). If no arguments given, find() will return all documents from the collection. A nice helper is the method pretty() which can be chained to the find() method invocation. This will print the resulting JSON strings in a nicely readable format.
 
 There are various ways to query the collection. basically the documents can be queried with each key available. So if one wants to find the document (or all documents) where the name is “Jimi Hendrix”, the query would look like this:
 
