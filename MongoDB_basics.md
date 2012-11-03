@@ -1,8 +1,8 @@
 # MongoDB Basics
 
-Author: Andy Wenk
-Version: 0.0.1
-Date: 03.11.2012
+Author: Andy Wenk  
+Version: 0.0.2  
+Date: 03.11.2012  
 
 ## Abstract
 
@@ -227,5 +227,5 @@ The documents key music-genre is holding a list (array) with different values. I
 
 1 [https://education.10gen.com/courses/](https://education.10gen.com/courses/)  
 2 [http://mxcl.github.com/homebrew/](http://mxcl.github.com/homebrew/)  
-3 [http://www.mongodb.org/downloads](http://www.mongodb.org/downloads)
+3 [http://www.mongodb.org/downloads](http://www.mongodb.org/downloads)  
 4 [http://bsonspec.org/#/specification](http://bsonspec.org/#/specification)
