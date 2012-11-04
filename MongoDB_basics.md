@@ -1,8 +1,8 @@
 # MongoDB Basics
 
 Author: Andy Wenk  
-Version: 0.0.3  
-Date: 03.11.2012  
+Version: 0.1.4  
+Date: 04.11.2012  
 
 ## Abstract
 
@@ -148,6 +148,7 @@ The documents in a database are organized in collections. Each database can have
 One document is found in the collection people of the database earth.	
 	
 ### Creating a document with **insert()**
+URL: [http://docs.mongodb.org/manual/reference/method/db.collection.insert/](http://docs.mongodb.org/manual/reference/method/db.collection.insert/)
 
 Creating documents is basically the task to put one or more JSON string(s) into a collection.
 
@@ -179,7 +180,47 @@ When now firing
 
 there should exist four documents with great guitar players in the the people collection.
 
+### Updating a document with **update()**
+URL: [http://docs.mongodb.org/manual/reference/method/db.collection.update/](http://docs.mongodb.org/manual/reference/method/db.collection.update/)
+
+The simplest way to update a document is rewriting the whole document by _id:
+
+    > db.people.update(
+    	{
+    		"_id": ObjectId("509588e8cbba747f461b00ab")
+    	},
+    	{
+    		"name" : "Carlos Santana", 
+    		"profession" : "guitarist", 
+    		"music-genre" : [ "rock", "latin" ],
+    		"score":100})
+		}
+	)
+	
+But this approach is kind of lame. So the better way is to update (or add if not existing) a specific key’s value. This can be done with the operator *$set*:	
+	
+	> db.people.update(
+		{
+			"_id":ObjectId("509589a21b310876b948aade")
+		},
+		{
+			$set: {"score": 400}
+		}
+	)
+
+The first parameter does not have to be an _id but can also include some criteria like 
+
+	{"name": "Carlos Santana"}
+
+or also operators used in find(). 
+
+There are two options which can be used as the third parameter:
+
+	multi: true -> update many documents
+	upsert: true -> if the document does not exist, create it.
+
 ### Removing a document with **remove()**
+URL: [http://docs.mongodb.org/manual/reference/method/db.collection.remove/](http://docs.mongodb.org/manual/reference/method/db.collection.remove/)
 
 The remove() method is basically the same as find() (see next). It is expecting a JSON string with information about which document to remove from the collection. The most obvious way is to remove a documetn by its _id:
 
@@ -193,6 +234,7 @@ The remove() method is basically the same as find() (see next). It is expecting 
 	3
 
 ### Querying documents with findOne()
+URL: [http://docs.mongodb.org/manual/reference/method/db.collection.findOne/](http://docs.mongodb.org/manual/reference/method/db.collection.findOne/)
 
 The findOne() method is a helper method for find() and will return exactly one or zero documents. It expects a document with the query values as a first parameter. The second parameter is denoting which values should be returned:
 
@@ -200,6 +242,7 @@ The findOne() method is a helper method for find() and will return exactly one o
 	{ "profession" : "guitarist" }  
 
 ### Querying documents with **find()**
+URL: [http://docs.mongodb.org/manual/reference/method/db.collection.find/](http://docs.mongodb.org/manual/reference/method/db.collection.find/)
 
 As already shown before, documents are retrieved from a collection by firing the method find(). If no arguments given, find() will return all documents from the collection. A nice helper is the method pretty() which can be chained to the find() method invocation. This will print the resulting JSON strings in a nicely readable format.
 
