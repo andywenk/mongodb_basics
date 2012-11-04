@@ -228,7 +228,41 @@ The documents key music-genre is holding a list (array) with different values. I
 		]
 	}
 
+### Using $-operators in find()
 
+There are various operators available which are very useful for advanced queries.
+
+#### $regex
+
+#### $gt and $gte 
+
+#### $lt and $lte
+
+#### $exists
+
+#### $type
+
+#### $or
+
+#### $and
+
+#### $in
+
+#### $all
+
+### Combining $-operators in find()
+
+#### $lt(e) and $gt(e)
+
+#### $exists and $type
+
+#### $or and $and
+
+#### $in and $all
+
+### Querying embedded documents with dot notation
+
+ 
 	
 #### Resources
 
