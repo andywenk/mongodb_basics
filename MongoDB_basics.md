@@ -1,8 +1,8 @@
 # MongoDB Basics
 
 Author: Andy Wenk  
-Version: 0.2.0  
-Date: 04.11.2012  
+Version: 0.2.1  
+Date: 05.11.2012  
 
 ## Abstract
 
@@ -102,7 +102,7 @@ To see which collections a db has, *show collections* is used:
 
 ## The query interface
 
-This part is showing the basic usage of the MongoDB query inteface. And **no** - it’s not like SQL. There are various methods and query-operators. Basically every method and operator is expecting a document as a parameter, which is represented as a JSON string or nothing at all.
+This part is showing the basic usage of the MongoDB query inteface. And **no** - it’s not like SQL. There are various methods and query-operators. Basically every method and operator is expecting a document as a parameter, which is represented as a JSON-like string or nothing at all.
 
 ### create a database
 
@@ -150,7 +150,7 @@ One document is found in the collection people of the database earth.
 ### Creating a document with **insert()**
 URL: [http://docs.mongodb.org/manual/reference/method/db.collection.insert/](http://docs.mongodb.org/manual/reference/method/db.collection.insert/)
 
-Creating documents is basically the task to put one or more JSON string(s) into a collection.
+Creating documents is basically the task to put one or more JSON-like string(s) into a collection.
 
 Adding one document:
 
@@ -246,7 +246,7 @@ Finally there is the operator *$unset* to remove one or more fields from one or 
 ### Removing a document with **remove()**
 URL: [http://docs.mongodb.org/manual/reference/method/db.collection.remove/](http://docs.mongodb.org/manual/reference/method/db.collection.remove/)
 
-The remove() method is basically the same as find() (see next). It is expecting a JSON string with information about which document to remove from the collection. The most obvious way is to remove a documetn by its _id:
+The remove() method is basically the same as find() (see next). It is expecting a document with information about which document to remove from the collection. The most obvious way is to remove a documetn by its _id:
 
 	> db.people.find()
 	{ 	"_id" : ObjectId("509588e8cbba747f461b00ab"), 
@@ -280,7 +280,7 @@ The findOne() method is a helper method for find() and will return exactly one o
 ### Querying documents with **find()**
 URL: [http://docs.mongodb.org/manual/reference/method/db.collection.find/](http://docs.mongodb.org/manual/reference/method/db.collection.find/)
 
-As already shown before, documents are retrieved from a collection by firing the method find(). If no arguments given, find() will return all documents from the collection. A nice helper is the method pretty() which can be chained to the find() method invocation. This will print the resulting JSON strings in a nicely readable format.
+As already shown before, documents are retrieved from a collection by firing the method find(). If no arguments given, find() will return all documents from the collection. A nice helper is the method pretty() which can be chained to the find() method invocation. This will print the resulting documents in a nicely readable format.
 
 There are various ways to query the collection. basically the documents can be queried with each key available. So if one wants to find the document (or all documents) where the name is “Jimi Hendrix”, the query would look like this:
 
