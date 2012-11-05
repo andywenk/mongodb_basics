@@ -1,7 +1,7 @@
 # MongoDB Basics
 
 Author: Andy Wenk  
-Version: 0.1.4  
+Version: 0.2.0  
 Date: 04.11.2012  
 
 ## Abstract
@@ -219,16 +219,52 @@ There are two options which can be used as the third parameter:
 	multi: true -> update many documents
 	upsert: true -> if the document does not exist, create it.
 
+There is also a operator called *$inc* which will increase e.g. score to the given value in *$inc*:
+
+	> db.people.update(
+		{
+			"name": "Carlos Santana")
+		},
+		{
+			$inc: {"score": 20}
+		}
+	)
+
+The score is now 420.
+
+Finally there is the operator *$unset* to remove one or more fields from one or more documents:
+
+	> db.people.update(
+		{
+			'name': 'Zakk Wylde'
+		}, 
+		{
+			$unset: {‘score': 1}
+		}
+	)
+
 ### Removing a document with **remove()**
 URL: [http://docs.mongodb.org/manual/reference/method/db.collection.remove/](http://docs.mongodb.org/manual/reference/method/db.collection.remove/)
 
 The remove() method is basically the same as find() (see next). It is expecting a JSON string with information about which document to remove from the collection. The most obvious way is to remove a documetn by its _id:
 
 	> db.people.find()
-	{ "_id" : ObjectId("509588e8cbba747f461b00ab"), "name" : "Carlos Santana", "profession" : 		"guitarist", "music-genre" : [ "rock", "latin" ] }
-	{ "_id" : ObjectId("509588e8cbba747f461b00ac"), "name" : "Stevie Ray Vaughn", "profession" : "guitarist", 		"music-genre" : [ "rock", "blues" ] }
-	{ "_id" : ObjectId("509589a21b310876b948aade"), "name" : "Jimi Hendrix", "profession" : 		"guitarist", "music-genre" : [ "rock", "blues" ] }
-	{ "_id" : ObjectId("50958a631b310876b948aadf"), "name" : "Zakk Wylde", "profession" : 		"guitarist", "music-genre" : [ "metal", "rock" ] }
+	{ 	"_id" : ObjectId("509588e8cbba747f461b00ab"), 
+		"name" : "Carlos Santana", 
+		"profession" : "guitarist",
+		 "music-genre" : [ "rock", "latin" ] }
+	{ 	"_id" : ObjectId("509588e8cbba747f461b00ac"), 
+		"name" : "Stevie Ray Vaughn", 
+		"profession" : "guitarist",
+		"music-genre" : [ "rock", "blues" ] }
+	{ 	"_id" : ObjectId("509589a21b310876b948aade"), 
+		"name" : "Jimi Hendrix", 
+		"profession" :"guitarist", 
+		"music-genre" : [ "rock", "blues" ] }
+	{ 	"_id" : ObjectId("50958a631b310876b948aadf"), 
+		"name" : "Zakk Wylde", 
+		"profession" : "guitarist", 
+		"music-genre" : [ "metal", "rock" ] }
 	> db.people.remove({_id: ObjectId("509588e8cbba747f461b00ac")});
 	> db.people.find().count()
 	3
@@ -275,38 +311,169 @@ The documents key music-genre is holding a list (array) with different values. I
 
 There are various operators available which are very useful for advanced queries.
 
-#### $regex
+#### $gt and $gte (greater than and greater or equals than)
 
-#### $gt and $gte 
+	> db.people.find({score: {$gt: 200}},{name: true, score: true, _id: false})
+	{ "name" : "Jimi Hendrix", "score" : 400 }
+	
+	> db.people.find({score: {$gte: 200}},{name: true, score: true, _id: false}).pretty()
+	{ "name" : "Carlos Santana", "score" : 200 }
+	{ "name" : "Jimi Hendrix", "score" : 400 }
 
-#### $lt and $lte
+#### $lt and $lte (lower than and lower or equals than) 
 
-#### $exists
+	> db.people.find({score: {$lte: 200}},{name: true, score: true, _id: false}).pretty()
+	{ "name" : "Carlos Santana", "score" : 200 }
+	
+	> db.people.find({score: {$lt: 200}},{name: true, score: true, _id: false}).pretty()
+	// nothing
+	
+#### $regex, $exists
+	
+	> db.people.find({"name":{$regex:"Carl"},"profession":{$exists:true}},{name: true, score: 
+		true, _id: false})
+	{ "name" : "Carlos Santana", "score" : 200 }
 
-#### $type
+#### $type	
 
+$type is the data type specified in the BSON specification [4]. Here is a short excerpt:
+
+	element	::=	"\x01" e_name double	Floating point
+			|	"\x02" e_name string	UTF-8 string
+			|	"\x03" e_name document	Embedded document
+			|	"\x04" e_name document	Array
+			|	"\x05" e_name binary	Binary data
+			|	"\x06" e_name	Undefined — Deprecated
+			|	"\x07" e_name (byte*12)	ObjectId
+			|	"\x08" e_name "\x00"	Boolean "false"
+			|	"\x08" e_name "\x01"	Boolean "true"
+			|	"\x09" e_name int64	UTC datetime
+			|	"\x0A" e_name	Null value
+			|	"\x0B" e_name cstring cstring	Regular expression
+			|	"\x0C" e_name string (byte*12) DBPointer (Deprecated)
+			|	"\x0D" e_name string	JavaScript code
+			|	"\x0E" e_name string	Symbol — Deprecated
+			|	"\x0F" e_name code_w_s	JavaScript code w/ scope
+			|	"\x10" e_name int32	32-bit Integer
+			|	"\x11" e_name int64	Timestamp
+			|	"\x12" e_name int64	64-bit integer
+			|	"\xFF" e_name	Min key
+			|	"\x7F" e_name	Max key
+
+Here is an exmple for string:
+
+	> db.people.find({name: {$type: 2}},{name: true, score: true, _id: false})
+	{ "name" : "Carlos Santana", "score" : 200 }
+	{ "name" : "Zakk Wylde", "score" : 600 }
+	{ "name" : "Jimi Hendrix", "score" : 400 }		
+	
 #### $or
+
+	> db.people.find({$or : [{score: {$lt: 400}},{score: {$gt:200}}] },
+		{name: true, score: true, 	_id: false})
+	{ "name" : "Carlos Santana", "score" : 200 }
+	{ "name" : "Zakk Wylde", "score" : 600 }
+	{ "name" : "Jimi Hendrix", "score" : 400 }
 
 #### $and
 
+	> db.people.find({$and : [{score: {$lte: 400}},{score: {$gt:200}}] },
+		{name: true, score: true, _id: false})
+	{ "name" : "Jimi Hendrix", "score" : 400 }
+	
 #### $in
+
+This is kind of the IN Operator in SQL.
+
+	> db.people.find({'music-genre': {$in : ['latin','metal']}},
+		{name: true, score: true, _id: false})
+	{ "name" : "Carlos Santana", "score" : 200 }
+	{ "name" : "Zakk Wylde", "score" : 600 }
 
 #### $all
 
+	> db.people.find({'music-genre': {$all : ['rock']}},
+		{name: true, score: true, _id: false})
+	{ "name" : "Carlos Santana", "score" : 200 }
+	{ "name" : "Zakk Wylde", "score" : 600 }
+	{ "name" : "Jimi Hendrix", "score" : 400 }
+
+But see this:
+
+	> db.people.find({'music-genre': {$all : ['rock', 'latin']}},
+		{name: true, score: true, _id: false})
+	{ "name" : "Carlos Santana", "score" : 200 }
+
 ### Combining $-operators in find()
 
-#### $lt(e) and $gt(e)
-
-#### $exists and $type
-
-#### $or and $and
-
-#### $in and $all
+You can combine all these Operators - as already shown with $lt and $gt. 
 
 ### Querying embedded documents with dot notation
 
- 
-	
+It is possible to query also embedded subdocuments. Here is such a document:
+
+	> db.people.update({name:'Zakk Wylde'},{$set: {bands: [{name: 'BLS', year: 2000},
+		{name:'Ozzy', year: 1998},{name: 'Pride and Glory'}]}}) 
+	> db.people.find({name:'Zakk Wylde'})
+	{
+		"_id" : ObjectId("50958a631b310876b948aadf"),
+		"bands" : [
+		{
+			"name" : "BLS",
+			"year" : 2000
+		},
+		{
+			"name" : "Ozzy",
+			"year" : 1998
+		},
+		{
+			"name" : "Pride and Glory"
+		}
+		],
+		"music-genre" : [
+			"metal",
+			"rock"
+		],
+		"name" : "Zakk Wylde",
+		"profession" : "guitarist",
+		"score" : 600
+	}
+
+And here is a chained query where just the year of the band should be come back:
+
+	> db.people.find({'bands.name': 'BLS'},{'bands.year':true})
+	{
+		"_id" : ObjectId("50958a631b310876b948aadf"),
+		"bands" : [
+			{
+				"year" : 2000
+			},
+			{
+				"year" : 1998
+			},
+			{
+			
+			}
+		]
+	}
+
+### Querying documents with cursors
+
+### Querying Arrays inside a document with operators
+
+#### push
+
+#### pop
+
+#### pull
+
+#### pushAll
+
+#### pullAll
+
+#### addToSet 
+
+
 #### Resources
 
 1 [https://education.10gen.com/courses/](https://education.10gen.com/courses/)  
