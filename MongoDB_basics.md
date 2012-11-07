@@ -1,8 +1,8 @@
 # MongoDB Basics
 
 Author: Andy Wenk  
-Version: 0.2.1  
-Date: 05.11.2012  
+Version: 0.3.0  
+Date: 06.11.2012  
 
 ## Abstract
 
@@ -242,6 +242,10 @@ Finally there is the operator *$unset* to remove one or more fields from one or 
 			$unset: {‘score': 1}
 		}
 	)
+
+Adding new data to all available documents requires to set the *multi* option. An empty document {} passed as the first parameter is denoting all documents in the collection:
+
+	> db.people.update({}, {$set: {age: 35} }, {multi: true})
 
 ### Removing a document with **remove()**
 URL: [http://docs.mongodb.org/manual/reference/method/db.collection.remove/](http://docs.mongodb.org/manual/reference/method/db.collection.remove/)
