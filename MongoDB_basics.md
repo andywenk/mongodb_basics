@@ -1,8 +1,8 @@
 # MongoDB Basics
 
 Author: Andy Wenk  
-Version: 0.3.0  
-Date: 06.11.2012  
+Version: 0.4.0  
+Date: 08.11.2012  
 
 ## Abstract
 
@@ -463,22 +463,112 @@ And here is a chained query where just the year of the band should be come back:
 
 ### Querying documents with cursors
 
+cursors are a convenient way to assign the result of a query to a variable - this variable is called cursor. 
+
+	> cur = cur = db.people.find(); null;
+	null
+
+On the mongo shell you need to return something different than the cursor itself, because otherwiese the content of the cursor is returned and the cursor is “empty”.
+
+First document from the cursor:
+
+	> cur.next()
+	{
+		"_id" : ObjectId("509588e8cbba747f461b00ab"),
+		"name" : "Carlos Santana",
+		"profession" : "guitarist",
+		"music-genre" : [
+			"rock",
+			"latin"
+		],
+		"score" : 200
+	}
+
+Check if there more docuements hold by the cursor.
+
+	> cur.hasNext()
+	true
+
+### Manipulating the result of cursors
+
+With sort, skip and limit the result of a cursor can be manipulated. If chained, the execution order of the three methods is always: **sort - skip - limit**
+
+#### sort
+
+ASC
+
+	> cur = db.people.find(); null;
+	null
+	> cur.sort({'name': 1})
+	// Carlos Santana, Jimi Hendrix, Zakk Wylde
+	
+DESC
+
+	> cur = db.people.find(); null;
+	null
+	> cur.sort({'name': -1})
+	// Zakk Wylde, Jimi Hendrix, Carlos Santana 
+
+#### skip
+	
+	> cur = db.people.find(); null;
+	null
+	> cur.skip(2)
+	// only Zakk Wylde returned
+
+#### limit 
+
+	> cur = db.people.find(); null;
+	null
+	> cur.limit(2); null;
+	null
+	> cur.count()
+	3
+	> cur
+	{ "_id" : ObjectId("509588e8cbba747f461b00ab"), "name" : "Carlos Santana", "profession" : "guitarist", 	"music-genre" : [ "rock", "latin" ], "score" : 200 }
+	{ "_id" : ObjectId("509589a21b310876b948aade"), "music-genre" : [ "rock", "blues" ], 	"name" : "Jimi Hendrix", "profession" : "guitarist", "score" : 400 }
+	
 ### Querying Arrays inside a document with operators
+
+	> db.people.insert({_id:'Joe',name: 'Joe Satriani'})
+	{ "_id" : "Joe", "name" : "Joe Satriani" }
 
 #### push
 
+	> db.people.update({_id:'Joe'}, {$push: {guitars: 'Ibanez'}})
+	> db.people.find({'_id':'Joe'})
+	{ "_id" : "Joe", "guitars" : [ "Ibanez" ], "name" : "Joe Satriani" }
+
 #### pop
+
+	> db.people.update({_id:'Joe'}, {$pop: {guitars: 'Ibanez'}})
+	> db.people.find({'_id':'Joe'})
+	{ "_id" : "Joe", "guitars" : [ ], "name" : "Joe Satriani" }
+	
+#### pushAll
+	> db.people.update({_id:'Joe'}, {$pushAll: {guitars: ['Ibanez','Gibson','Martin']}})
+	> db.people.find({'_id':'Joe'})
+	{ "_id" : "Joe", "guitars" : [ "Ibanez", "Gibson", "Martin" ], "name" : "Joe Satriani" }
 
 #### pull
 
-#### pushAll
+	> db.people.update({_id:'Joe'}, {$pull: {guitars: 'Gibson'}})
+	> db.people.find({'_id':'Joe'})
+	{ "_id" : "Joe", "guitars" : [ "Ibanez", "Martin" ], "name" : "Joe Satriani" }
 
 #### pullAll
-
+	
+	> db.people.update({_id:'Joe'}, {$pullAll: {guitars: ['Ibanez','Martin']}})
+	> db.people.find({'_id':'Joe'})
+	{ "_id" : "Joe", "guitars" : [ ], "name" : "Joe Satriani" }
+	
 #### addToSet 
+	
+	> db.people.update({_id:'Joe'}, {$addToSet: {guitars: 'Gibson'}})
+	> db.people.find({'_id':'Joe'})
+	{ "_id" : "Joe", "guitars" : [ "Gibson" ], "name" : "Joe Satriani" }
 
-
-#### Resources
+## Resources
 
 1 [https://education.10gen.com/courses/](https://education.10gen.com/courses/)  
 2 [http://mxcl.github.com/homebrew/](http://mxcl.github.com/homebrew/)  
