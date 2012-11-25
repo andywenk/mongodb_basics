@@ -568,6 +568,127 @@ DESC
 	> db.people.find({'_id':'Joe'})
 	{ "_id" : "Joe", "guitars" : [ "Gibson" ], "name" : "Joe Satriani" }
 
+### Indexes
+
+Using Indexes is strongly recommended to not run into performance issues. As MongoDB can handle millions of documents, indexes are vital for a good performance.
+
+#### create an index
+
+	> db.people.ensureIndex({name:1})
+	> db.people.getIndexes()
+	[
+		{
+			"v" : 1,
+			"key" : {
+				"_id" : 1
+			},
+			"ns" : "earth.people",
+			"name" : "_id_"
+		},
+		{
+			"v" : 1,
+			"key" : {
+				"name" : 1
+			},
+			"ns" : "earth.people",
+			"name" : "name_1"
+		}
+	]
+	
+#### drop an index
+
+	> db.people.dropIndex({name:1})
+	{ "nIndexesWas" : 2, "ok" : 1 }
+
+#### create many indexes
+
+	> db.people.ensureIndex({name:1,profession:1})
+	> db.people.getIndexes()
+    [
+      {
+        "v" : 1,
+        "key" : {
+          "_id" : 1
+        },
+        "ns" : "earth.people",
+        "name" : "_id_"
+      },
+      {
+        "v" : 1,
+        "key" : {
+          "name" : 1,
+          "profession" : 1
+        },
+        "ns" : "earth.people",
+        "name" : "name_1_profession_1"
+      }
+    ]
+
+#### create unique indexes
+
+This means, the value for the indexed key must be unique. If there are already documents conatining a key with the same value,
+the index will not be created. 
+
+    > db.people.createIndex({name:1},{unique:true})
+    > db.people.getIndexes()
+    [
+      {
+        "v" : 1,
+        "key" : {
+          "_id" : 1
+        },
+        "ns" : "earth.people",
+        "name" : "_id_"
+      },
+      {
+        "v" : 1,
+        "key" : {
+          "name" : 1
+        },
+        "ns" : "earth.people",
+        "name" : "name_1",
+        "uniuqe" : true
+      }
+    ]
+
+If you want to force the uniqueness of the indexed keys, you can drop the dupes:
+
+    > db.people.insert({"name" : "Carlos Santana", "profession" : "guitarist", 
+    "music-genre" : [ "rock", "latin" ], "score" : 200 })
+    > db.people.createIndex({name:1},{unique:true})
+    E11000 duplicate key error index: earth.people.$name_1  dup key: { : "Carlos Santana" }
+    > db.people.createIndex({name:1},{unique:true, dropDups:true})
+
+But TAKE CARE! You don’t know which document is beeing dropped!
+
+#### creating sparse indexes
+
+You can only create an index for a key, if every document has this key. If you still want to create an index even though there are documents without that key, you need to create a sparse index
+
+Here are some robots:
+
+    > db.robots.insert({robot:'walle',engine:'fuel',size:'50cm'})
+    > db.robots.insert({robot:'Ash',engine:'battery',size:'180cm'})
+    > db.robots.insert({robot:'HAL',engine:'atomic'})
+    > db.robots.insert({robot:'T-800',engine:'battery'})
+
+If trying to create an index on the key size will fail:
+
+    > db.robots.ensureIndex({size:1},{unique:true})
+    E11000 duplicate key error index: earth.robots.$size_1  dup key: { : null }
+
+It works when using sparse:true:
+
+    > db.robots.ensureIndex({size:1},{unique:true,sparse:true})
+
+But be aware, that only the documents with the key size are in the index. So if you use an aggregate function like sort(), you will only sort the documents in the index (here only two documents are found):
+
+    > db.robots.find().sort({size:1})
+    { "_id" : ObjectId("50b15e6b2bde811ff29731fe"), "robot" : "Ash", "engine" : "battery", "size" : "180cm" }
+    { "_id" : ObjectId("50b15e332bde811ff29731fd"), "robot" : "walle", "engine" : "fuel", "size" : "50cm" }	
+
+
+
 ## Resources
 
 1 [https://education.10gen.com/courses/](https://education.10gen.com/courses/)  
