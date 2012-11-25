@@ -687,7 +687,123 @@ But be aware, that only the documents with the key size are in the index. So if 
     { "_id" : ObjectId("50b15e6b2bde811ff29731fe"), "robot" : "Ash", "engine" : "battery", "size" : "180cm" }
     { "_id" : ObjectId("50b15e332bde811ff29731fd"), "robot" : "walle", "engine" : "fuel", "size" : "50cm" }	
 
+#### when is the index used - explain()
 
+There are some things to know, when an index - especially a compound index - is used. First some data:
+
+	> for (i = 0; i < 1000000; i++) { db.many.insert({a:i,b:i,c:i}) }
+    > db.many.find().count()
+    1000000
+
+Now creating the compound index:
+
+    > db.many.ensureIndex({a:1,b:1,c:1})
+    > db.many.getIndexes()
+    [
+      {
+        "v" : 1,
+        "key" : {
+          "_id" : 1
+        },
+        "ns" : "earth.many",
+        "name" : "_id_"
+      },
+      {
+        "v" : 1,
+        "key" : {
+          "a" : 1,
+          "b" : 1,
+          "c" : 1
+        },
+        "ns" : "earth.many",
+        "name" : "a_1_b_1_c_1"
+      }
+    ]
+
+Finding a document where the key is a. explain() shows, what is happening during the query. Here, the index is used:
+
+    > db.many.find({a:50}).explain()
+    {
+      "cursor" : "BtreeCursor a_1_b_1_c_1",
+      "isMultiKey" : false,
+      "n" : 1,
+      "nscannedObjects" : 1,
+      "nscanned" : 1,
+      "nscannedObjectsAllPlans" : 1,
+      "nscannedAllPlans" : 1,
+      "scanAndOrder" : false,
+      "indexOnly" : false,
+      "nYields" : 0,
+      "nChunkSkips" : 0,
+      "millis" : 0,
+      "indexBounds" : {
+        "a" : [
+          [
+            50,
+            50
+          ]
+        ],
+        "b" : [
+          [
+            {
+              "$minElement" : 1
+            },
+            {
+              "$maxElement" : 1
+            }
+          ]
+        ],
+        "c" : [
+          [
+            {
+              "$minElement" : 1
+            },
+            {
+              "$maxElement" : 1
+            }
+          ]
+        ]
+      },
+      "server" : "MBP-andwen.local:27017"
+    }
+
+Here also - a and b are used in the index query:
+
+    > db.many.find({a:50,b:50}).explain()
+    {
+      "cursor" : "BtreeCursor a_1_b_1_c_1",
+      ...
+
+And here also but only a is used in the index:
+
+    > db.many.find({a:50,c:50}).explain()
+    {
+      "cursor" : "BtreeCursor a_1_b_1_c_1",
+      ...
+
+BUT - here not because querying the index requires the leftmost index key provided in the query:
+
+    > db.many.find({b:50}).explain()
+    {
+      "cursor" : "BasicCursor",
+      "isMultiKey" : false,
+      "n" : 1,
+      "nscannedObjects" : 1000000,
+      "nscanned" : 1000000,
+      "nscannedObjectsAllPlans" : 1000000,
+      "nscannedAllPlans" : 1000000,
+      "scanAndOrder" : false,
+      "indexOnly" : false,
+      "nYields" : 1,
+      "nChunkSkips" : 0,
+      "millis" : 653,
+      "indexBounds" : {
+        
+      },
+      "server" : "MBP-andwen.local:27017"
+    }
+
+So the last query takes 653 milli seconds instead of 0 milli seconds. Wow ... 
 
 ## Resources
 
