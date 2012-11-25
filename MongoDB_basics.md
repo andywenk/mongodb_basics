@@ -568,11 +568,11 @@ DESC
 	> db.people.find({'_id':'Joe'})
 	{ "_id" : "Joe", "guitars" : [ "Gibson" ], "name" : "Joe Satriani" }
 
-### Indexes
+## Indexes
 
 Using Indexes is strongly recommended to not run into performance issues. As MongoDB can handle millions of documents, indexes are vital for a good performance.
 
-#### create an index
+### Creating an index
 
 	> db.people.ensureIndex({name:1})
 	> db.people.getIndexes()
@@ -595,12 +595,12 @@ Using Indexes is strongly recommended to not run into performance issues. As Mon
 		}
 	]
 	
-#### drop an index
+### Dropping an index
 
 	> db.people.dropIndex({name:1})
 	{ "nIndexesWas" : 2, "ok" : 1 }
 
-#### create many indexes
+### Creating many indexes
 
 	> db.people.ensureIndex({name:1,profession:1})
 	> db.people.getIndexes()
@@ -624,7 +624,7 @@ Using Indexes is strongly recommended to not run into performance issues. As Mon
       }
     ]
 
-#### create unique indexes
+### Creating unique indexes
 
 This means, the value for the indexed key must be unique. If there are already documents conatining a key with the same value,
 the index will not be created. 
@@ -661,7 +661,7 @@ If you want to force the uniqueness of the indexed keys, you can drop the dupes:
 
 But TAKE CARE! You don’t know which document is beeing dropped!
 
-#### creating sparse indexes
+### Creating sparse indexes
 
 You can only create an index for a key, if every document has this key. If you still want to create an index even though there are documents without that key, you need to create a sparse index
 
@@ -687,7 +687,7 @@ But be aware, that only the documents with the key size are in the index. So if 
     { "_id" : ObjectId("50b15e6b2bde811ff29731fe"), "robot" : "Ash", "engine" : "battery", "size" : "180cm" }
     { "_id" : ObjectId("50b15e332bde811ff29731fd"), "robot" : "walle", "engine" : "fuel", "size" : "50cm" }	
 
-#### when is the index used - explain()
+### When is the index used - explain()
 
 There are some things to know, when an index - especially a compound index - is used. First some data:
 
@@ -803,7 +803,7 @@ BUT - here not because querying the index requires the leftmost index key provid
       "server" : "MBP-andwen.local:27017"
     }
 
-So the last query takes 653 milli seconds instead of 0 milli seconds. Wow ... 
+So the last query takes 653 milliseconds instead of 0 milliseconds. Wow ... 
 
 ## Resources
 
