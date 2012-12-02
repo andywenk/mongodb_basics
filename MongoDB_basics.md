@@ -805,6 +805,186 @@ BUT - here not because querying the index requires the leftmost index key provid
 
 So the last query takes 653 milliseconds instead of 0 milliseconds. Wow ... 
 
+## Aggregation Framework
+
+The Aggregation Framework is providing methods to aggregate results. There are similarities to SQL’s aggregation methods like count or group by.
+
+### Keywords in the aggregation pipeline
+
+	$project - reshape
+	$match - filter data
+	$group - aggregation
+		$sum
+		$avg
+		$min
+		$max
+		$push - will create an array
+		$addToSet - will create an array
+		$first - needs to sort the result first
+		$last - needs to sort the result first
+	$sort - sort data
+	$skip - skip data
+	$limit - limit data results
+	$unwind - create normalized data from e.g. keys
+
+### Simple example
+	
+	> db.people.aggregate([{$group:{_id:'$profession'}}])
+	{
+     		"result" : [
+     		{
+			"_id" : null,
+			"count" : 1
+		},
+		{
+			"_id" : "guitarist",
+			"count" : 3
+		}],
+       	"ok" : 1
+      }
+ 
+ In the first example the result is the aggregation for the profession key. There is only one hit: guitarist.
+ 
+ 	> db.people.aggregate([{$group:{_id:'$name’, count:{$sum:1}}}])
+    {
+     	"result" : [
+      	{
+			"_id" : "Joe Satriani",
+			"count" : 1
+		},
+		{
+			"_id" : "Zakk Wylde",
+			"count" : 1
+		},
+		{
+			"_id" : "Jimi Hendrix",
+			"count" : 1
+		},
+		{
+			"_id" : "Carlos Santana",
+			"count" : 1
+		}],
+     	"ok" : 1
+     }
+
+In the second example the result is the aggregation of the key name.   
+     
+### Compound aggregation
+
+It is for sure possible to aggregate more than one key.
+
+	> db.people.aggregate([{$group:{_id:{profession: '$profession', year:'$year'},count:{$sum:1}}}])
+  	{
+    	"result" : [
+     	 	{
+        	"_id" : {
+          		"profession" : "guitarist",
+          		"year" : 1998
+        	},
+        	"count" : 1
+      	},
+      	{
+        	"_id" : {
+        	},
+        	"count" : 1
+      	},
+      	{
+        	"_id" : {
+          		"profession" : "guitarist"
+        	},
+        	"count" : 2
+      	}],
+    	"ok" : 1
+  	} 
+
+### Aggregation with using $sum
+
+I am using here an extraction of the above mentioned 10gen course. The documents for a city in a collection called zips look like this:
+
+    > db.zips.findOne()
+    {
+      "city" : "ACMAR",
+      "loc" : [
+        -86.51557,
+        33.584132
+      ],
+      "pop" : 6055,
+      "state" : "AL",
+      "_id" : "35004"
+    }
+
+To sum up the population pop for all 51 states state the aggregation query looks like this:
+
+	> db.zips.aggregate([{$group:{_id:'$state',population:{$sum:'$pop'}}}]) 
+	{
+  		"result" : [
+    	{
+      		"_id" : "WI",
+      		"population" : 4891769
+    		},
+    		{
+      		"_id" : "WV",
+      		"population" : 1793477
+    	},
+    	{
+      		"_id" : "VA",
+      		"population" : 6187358
+    	}
+    	...
+	
+### Aggregation with using $avg
+
+Again using the above mentioned extraction, here is an example for the usage of $avg. The question is how to get the average population for each state:
+
+	> db.zips.aggregate([{$group:{_id:'$state', average_pop:{$avg:'$pop'}}}])
+	{
+	"result" : [
+		{
+			"_id" : "WI",
+			"average_pop" : 6832.079608938548
+		},
+		{
+			"_id" : "WV",
+			"average_pop" : 2721.512898330804
+		},
+	...
+
+### Aggregation with using $addToSet
+
+Another example form the 10gen course for creating the result as a list of values from a specific key:
+
+	> db.zips.aggregate([{$group:{_id:'$city',postal_codes:{$addToSet:'$_id’}}}])
+	{
+			"_id" : "ELK RIVER",
+			"postal_codes" : [
+				"55330",
+				"83827"
+			]
+		},
+		{
+			"_id" : "BOYCE",
+			"postal_codes" : [
+				"22620",
+				"71409"
+			]
+		},
+		{
+			"_id" : "SEABROOK",
+			"postal_codes" : [
+				"29940",
+				"08302",
+				"03874"
+			]
+		},
+		{
+			"_id" : "MILLPORT",
+			"postal_codes" : [
+				"14864",
+				"35576"
+			]
+		}
+		...
+
 ## Resources
 
 1 [https://education.10gen.com/courses/](https://education.10gen.com/courses/)  
