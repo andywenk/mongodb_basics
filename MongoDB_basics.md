@@ -985,6 +985,101 @@ Another example form the 10gen course for creating the result as a list of value
 		}
 		...
 
+### Aggregation with using $push
+
+This is similar to $addToSet with the difference, that values are also pushed more than once to the resulting array. 
+
+### Aggregation with using $max or $min
+
+### Double $group stages
+
+### Aggregation with using $project
+
+You can:
+
+* remove keys
+* add new keys
+* reshape keys (e.g. move the key to another document)
+* use functions like $toUpper, $toLower, $add, $multiply
+
+Here is an example for transforming this
+	{
+		"city" : "ACMAR",
+		"loc" : [
+			-86.51557,
+			33.584132
+		],
+		"pop" : 6055,
+		"state" : "AL",
+		"_id" : "35004"
+	}
+
+into
+
+	{
+		"city" : "acmar",
+		"pop" : 6055,
+		"state" : "AL",
+		"zip" : "35004"
+	}
+
+	> db.zips.aggregate([{$project:{_id:0,city:{$toLower:'$city'},pop:1,state:1,zip:'$_id'}}])
+
+### Aggregation with using $match
+
+For example find all cities where the population is greater than 100000
+
+	> db.zips.aggregate([{$match:{pop:{$gt:100000}}}])
+	{
+		"result" : [
+			{
+				"city" : "CHICAGO",
+				"loc" : [
+					-87.7157,
+					41.849015
+				],
+				"pop" : 112047,
+				"state" : "IL",
+				"_id" : "60623"
+			},
+			{
+				"city" : "NEW YORK",
+				"loc" : [
+					-73.958805,
+					40.768476
+				],
+				"pop" : 106564,
+				"state" : "NY",
+				"_id" : "10021"
+			}
+			...
+	],
+	"ok" : 1
+}
+
+### Aggregation with using $sort
+
+Important:
+
+* it can be very memory critical
+* it can be used before or after $group
+* it can be used to sort multiple times
+
+Sort all documents by state and city ascending
+
+	> db.zips.aggregate([{$sort:{state:1,city:1}}])
+
+### Aggregation with using $skip and $limit
+
+First $sort, then $skip and then $limit. It then works the same way lie mentioned already earlier.
+
+### Aggregation with using $first and $last
+
+### Aggregation with using $unwind
+
+### Aggregation with using double $unwind
+
+
 ## Resources
 
 1 [https://education.10gen.com/courses/](https://education.10gen.com/courses/)  
