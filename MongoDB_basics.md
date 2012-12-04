@@ -1,8 +1,8 @@
 # MongoDB Basics
 
 Author: Andy Wenk  
-Version: 0.4.0  
-Date: 08.11.2012  
+Version: 0.6.0  
+Date: 05.12.2012  
 
 ## Abstract
 
