@@ -1129,7 +1129,13 @@ And now counting how many elements of each array value are present:
 	}
 
 ### Aggregation examples
-	
+
+#### Finding the most frequent author of comments on your blog.
+
+	$ mongoimport -d blog -c posts --drop < posts.json
+
+Query:
+
 	> db.posts.aggregate([{
 		$unwind: "$comments"
 	},
@@ -1146,7 +1152,13 @@ And now counting how many elements of each array value are present:
 			count:-1
 		}
 	}])
-	
+
+#### Crunching the Zipcode dataset
+
+	$ mongoimport -d cities -c zips --drop < zips.json
+
+Query:
+
 	> db.zips.aggregate([{
 		$match: {
 			state: {$in: ['CA','NY']},
@@ -1160,7 +1172,13 @@ And now counting how many elements of each array value are present:
 			}
 		}
 	}])
-	
+
+#### Who's the easiest grader on campus?
+
+	$ mongoimport -d university -c students --drop < grades.json
+
+Query:
+
 	> db.students.aggregate([{
 		$unwind: "$scores"
 	},{
@@ -1181,7 +1199,9 @@ And now counting how many elements of each array value are present:
 			'average_score':1
 		}
 	}])
- 	
+
+#### Removing Rural Residents
+
  	> db.zips.aggregate([{
  		$project:{
  			first_char:{
@@ -1206,29 +1226,24 @@ And now counting how many elements of each array value are present:
 ## Replication
 
 Simple example with three nodes
-
+	
 	$ mkdir -p data/rs1 data/rs2 data/rs3
 	$ mkdir log
-	$ mongod --replSet rs1 --logpath "log/rs1.log" --dbpath data/rs1/ --port 27012 --fork
-	forked process: 16260
-	all output going to: /Users/andwen/Documents/project/mongo-course/log/rs1.log
-	child process started successfully, parent exiting
-	$ mongod --replSet rs2 --logpath "log/rs2.log" --dbpath data/rs2/ --port 27013 --fork
-	forked process: 16290
-	all output going to: /Users/andwen/Documents/project/mongo-course/log/rs2.log
-	child process started successfully, parent exiting
-	$ mongod --replSet rs3 --logpath "log/rs3.log" --dbpath data/rs3/ --port 27014 --fork
-	forked process: 16313
-	all output going to: /Users/andwen/Documents/project/mongo-course/log/rs3.log
-	child process started successfully, parent exiting
-	
+	$ mongod --replSet rs1 --logpath "log/rs1.log" --dbpath data/rs1/ --port 27017 --fork
+	$ mongod --replSet rs2 --logpath "log/rs2.log" --dbpath data/rs2/ --port 27018 --fork
+	$ mongod --replSet rs3 --logpath "log/rs3.log" --dbpath data/rs3/ --port 27019 --fork
+	$ mongo —port 27017
+	> config = { _id: "m101", members:[
+          { _id : 0, host : "localhost:27017"},
+          { _id : 1, host : "localhost:27018"},
+          { _id : 2, host : "localhost:27019"} ]
+	   };
+	> rs.status()
 
 ## Tools
 
 ### mongorestore
 
-
-	
 ## Resources
 
 1 [https://education.10gen.com/courses/](https://education.10gen.com/courses/)  
