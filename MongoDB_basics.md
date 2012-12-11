@@ -1079,7 +1079,156 @@ First $sort, then $skip and then $limit. It then works the same way lie mentione
 
 ### Aggregation with using double $unwind
 
+In other words: unjoin an array, which is a value of a key and join it again after doing some operations on the list.
 
+	> db.jug.insert({a:1,b:1,c:['apple','banana','orange']})
+	> db.jug.aggregate([{$unwind:'$c'}])
+	{
+		"result" : [
+			{
+				"_id" : ObjectId("50bfa9dea840105f01cc2311"),
+				"a" : 1,
+				"b" : 1,
+				"c" : "apple"
+			},
+			{
+				"_id" : ObjectId("50bfa9dea840105f01cc2311"),
+				"a" : 1,
+				"b" : 1,
+				"c" : "banana"
+			},
+			{
+				"_id" : ObjectId("50bfa9dea840105f01cc2311"),
+				"a" : 1,
+				"b" : 1,
+				"c" : "orange"
+			}
+		],
+		"ok" : 1
+	} 
+
+And now counting how many elements of each array value are present:
+
+	> db.jug.aggregate([{$unwind:'$c'},{$group:{_id:"$c",count:{$sum:1}}}])
+	{
+		"result" : [
+			{
+				"_id" : "orange",
+				"count" : 1
+			},
+			{
+				"_id" : "banana",
+				"count" : 1
+			},
+			{
+				"_id" : "apple",
+				"count" : 1
+			}
+		],
+		"ok" : 1
+	}
+
+### Aggregation examples
+	
+	> db.posts.aggregate([{
+		$unwind: "$comments"
+	},
+	{
+		$group: {
+			_id: "$comments.author", 
+			count:{
+				$sum:1
+			}
+		}
+	},
+	{
+		"$sort”: {
+			count:-1
+		}
+	}])
+	
+	> db.zips.aggregate([{
+		$match: {
+			state: {$in: ['CA','NY']},
+			pop: {$gt:25000}
+		}
+	}, {
+		$group:{
+			_id:'',
+			average:{
+				$avg: '$pop'
+			}
+		}
+	}])
+	
+	> db.students.aggregate([{
+		$unwind: "$scores"
+	},{
+		$match:{
+			'scores.type':{
+				$in:['exam','homework']
+			}
+		}
+	},{
+		$group:{
+			_id: '$class_id',
+			average_score:{
+				$avg: '$scores.score'
+			}
+		}
+	},{
+		$sort:{
+			'average_score':1
+		}
+	}])
+ 	
+ 	> db.zips.aggregate([{
+ 		$project:{
+ 			first_char:{
+ 				$substr:["$city",0,1]
+ 			},
+ 			city:1,
+ 			pop:1
+ 		}
+ 	},{
+ 		$match:{
+ 			first_char:/\d/
+ 		}
+ 	},{
+ 		$group:{
+ 			_id:'',
+ 			sum:{
+ 				$sum: '$pop'
+ 			}
+ 		}
+ 	}])
+
+## Replication
+
+Simple example with three nodes
+
+	$ mkdir -p data/rs1 data/rs2 data/rs3
+	$ mkdir log
+	$ mongod --replSet rs1 --logpath "log/rs1.log" --dbpath data/rs1/ --port 27012 --fork
+	forked process: 16260
+	all output going to: /Users/andwen/Documents/project/mongo-course/log/rs1.log
+	child process started successfully, parent exiting
+	$ mongod --replSet rs2 --logpath "log/rs2.log" --dbpath data/rs2/ --port 27013 --fork
+	forked process: 16290
+	all output going to: /Users/andwen/Documents/project/mongo-course/log/rs2.log
+	child process started successfully, parent exiting
+	$ mongod --replSet rs3 --logpath "log/rs3.log" --dbpath data/rs3/ --port 27014 --fork
+	forked process: 16313
+	all output going to: /Users/andwen/Documents/project/mongo-course/log/rs3.log
+	child process started successfully, parent exiting
+	
+
+## Tools
+
+### mongorestore
+
+
+	
 ## Resources
 
 1 [https://education.10gen.com/courses/](https://education.10gen.com/courses/)  

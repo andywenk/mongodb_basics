@@ -8,6 +8,14 @@ This is a summary of the basic usage of MongoDB. The idea is to have a short ove
  
 * If you are a MongoDB pro ... I can’t help you ;-)
 
+# Import  data
+
+In the data folder, you can find some example datafiles. Import them to the database and collection of your choice. Here I use the database called **cities** and import data from **zips.json** to a collection called **zips**:
+
+	mongoimport -d cities -c zips --drop < zips.json
+
+These datafiles have been provided by 10gen during the M101 course.
+
 **Checkout:**
 
 [http://www.mongodb.org/](http://www.mongodb.org/)  
